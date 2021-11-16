@@ -89,7 +89,6 @@ wt_actions.delete_worktree = function(prompt_bufnr)
 end
 
 local create_input_prompt = function(cb)
-
     --[[
     local window = Window.centered({
         width = 30,
@@ -167,27 +166,26 @@ end
 local create_worktree = function(opts)
     opts = get_default_opts(opts or {})
     opts.attach_mappings = function()
-        actions.select_default:replace(
-            function(prompt_bufnr, _)
-                local selected_entry = action_state.get_selected_entry()
-                local current_line = action_state.get_current_line()
+        actions.select_default:replace(function(prompt_bufnr, _)
+            local selected_entry = action_state.get_selected_entry()
+            local current_line = action_state.get_current_line()
 
-                actions.close(prompt_bufnr)
+            actions.close(prompt_bufnr)
 
-                local branch = selected_entry ~= nil and
-                    selected_entry.value or current_line
+            local branch = selected_entry ~= nil and selected_entry.value
+                or current_line
 
-                if branch == nil then
-                    return
+            if branch == nil then
+                return
+            end
+
+            create_input_prompt(function(name)
+                if name == "" then
+                    name = branch
                 end
-
-                create_input_prompt(function(name)
-                    if name == "" then
-                        name = branch
-                    end
-                    git_worktree.create_worktree(name, branch)
-                end)
+                git_worktree.create_worktree(name, branch)
             end)
+        end)
 
         -- do we need to replace other default maps?
 
@@ -244,10 +242,10 @@ local telescope_git_worktree = function(opts)
         return
     end
 
-    local displayer = require("telescope.pickers.entry_display").create {
+    local displayer = require("telescope.pickers.entry_display").create({
         separator = " ",
         items = displayer_items,
-    }
+    })
 
     local make_display = function(entry)
         local foo = {}
