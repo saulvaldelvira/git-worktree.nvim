@@ -1,5 +1,3 @@
-local Path = require("plenary.path")
-local Window = require("plenary.window.float")
 local strings = require("plenary.strings")
 local pickers = require("telescope.pickers")
 local finders = require("telescope.finders")
@@ -23,6 +21,11 @@ local switch_worktree = function(prompt_bufnr)
     if worktree_path ~= nil then
         git_worktree.switch_worktree(worktree_path)
     end
+end
+
+local transform_path = function (opts,path)
+    local p, _ = utils.transform_path(opts, path)
+    return p
 end
 
 local toggle_forced_deletion = function()
@@ -163,7 +166,7 @@ local telescope_git_worktree = function(opts)
             local index = #results + 1
             for key, val in pairs(widths) do
                 if key == 'path' then
-                    local new_path = utils.transform_path(opts, entry[key])
+                    local new_path = transform_path(opts, entry[key])
                     local path_len = strings.strdisplaywidth(new_path or "")
                     widths[key] = math.max(val, path_len)
                 else
@@ -193,9 +196,10 @@ local telescope_git_worktree = function(opts)
     }
 
     local make_display = function(entry)
+        local path = transform_path(opts, entry.path)
         return displayer {
             { entry.branch, "TelescopeResultsIdentifier" },
-            { utils.transform_path(opts, entry.path) },
+            { path },
             { entry.sha },
         }
     end
